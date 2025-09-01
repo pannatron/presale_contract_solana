@@ -48,11 +48,20 @@ solana config set --keypair ~/.config/solana/id.json
 ถ้า private key รั่ว → เงินหายหมดทันที
 
 #### 2.2 นำมาเก็บในไฟล์ id.json
+
+**วิธีที่ 1: JSON Array (64 ตัวเลข)**
 บันทึก private key array ที่ export มา → ใส่ไฟล์:
 ```bash
 nano ~/.config/solana/id.json
 ```
 วาง JSON array แล้วกด `Ctrl+O`, `Enter`, `Ctrl+X` เพื่อบันทึก
+
+**วิธีที่ 2: Base58 String หรือ Seed Phrase**
+หาก Phantom/Solflare ให้ Base58 string หรือ seed phrase:
+```bash
+solana-keygen recover "prompt://?full-path" --outfile ~/.config/solana/id.json
+```
+จากนั้นวาง Seed Phrase หรือ Private Key (Base58) ที่ได้มา → Solana CLI จะสร้าง id.json ให้ใช้งานได้เลย
 
 #### 2.3 ตั้งค่าให้ CLI ใช้กระเป๋านี้
 ```bash
@@ -107,6 +116,66 @@ solana config set --url https://api.mainnet-beta.solana.com
 
 # ตรวจสอบ balance
 solana balance
+```
+
+## 🧾 Mainnet Deployment Checklist
+
+⚠️ **ก่อน Deploy ไป Mainnet ให้ตรวจสอบขั้นตอนต่อไปนี้:**
+
+### 1. ตรวจสอบ Balance และ Configuration
+```bash
+# ตรวจสอบ balance (ต้องมีพอสำหรับค่า deploy)
+solana balance
+
+# ตรวจสอบว่า config ชี้ไป mainnet
+solana config get
+# ต้องแสดง: RPC URL: https://api.mainnet-beta.solana.com
+
+# ตรวจสอบ wallet address
+solana address
+```
+
+### 2. ทดสอบบน Devnet ก่อน
+```bash
+# Deploy และทดสอบบน devnet ก่อน
+solana config set --url https://api.devnet.solana.com
+yarn run build-deploy:devnet
+yarn run check:devnet
+
+# ถ้าทุกอย่างทำงานได้ดี จึงไป mainnet
+solana config set --url https://api.mainnet-beta.solana.com
+```
+
+### 3. Update Program ID หลัง Deploy ครั้งแรก
+หลังจาก deploy สำเร็จ ให้เอา Program ID ที่ได้มาอัพเดตใน:
+
+**Anchor.toml:**
+```toml
+[programs.mainnet]
+presale_contract_solana = "YOUR_NEW_PROGRAM_ID_HERE"
+```
+
+**programs/presale_contract_solana/src/lib.rs:**
+```rust
+declare_id!("YOUR_NEW_PROGRAM_ID_HERE");
+```
+
+### 4. Build และ Deploy ใหม่
+```bash
+# Build ใหม่หลังอัพเดต Program ID
+anchor build
+
+# Deploy ใหม่
+anchor deploy --provider.cluster mainnet-beta
+```
+
+### 5. ตรวจสอบผลลัพธ์
+```bash
+# ตรวจสอบว่า deploy สำเร็จ
+yarn run check:mainnet
+
+# ดูใน Explorer
+# https://explorer.solana.com/address/YOUR_PROGRAM_ID
 ```
 
 ## 🚀 การ Deploy Contract
