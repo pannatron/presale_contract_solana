@@ -2,7 +2,16 @@
   "license": "ISC",
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+    "verify": "node scripts/verify-setup.js",
+    "deploy:devnet": "node scripts/deploy.js devnet",
+    "deploy:testnet": "node scripts/deploy.js testnet",
+    "deploy:mainnet": "node scripts/deploy.js mainnet",
+    "check:devnet": "node scripts/check-results.js devnet",
+    "check:testnet": "node scripts/check-results.js testnet",
+    "check:mainnet": "node scripts/check-results.js mainnet",
+    "build-deploy:devnet": "chmod +x scripts/build-and-deploy.sh && ./scripts/build-and-deploy.sh --network devnet",
+    "build-deploy:mainnet": "chmod +x scripts/build-and-deploy.sh && ./scripts/build-and-deploy.sh --network mainnet"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.31.1"
